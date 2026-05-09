@@ -5,6 +5,27 @@ All notable changes to this project will be documented in this file.
 ## [Unreleased]
 
 ### Added
+- Production CI/CD workflow with GHCR + Azure Container Apps + Azure Static Web Apps
+- Dev branch CI workflow (lint, build, validate)
+- Automatic API URL discovery — frontend build no longer requires manual URL updates
+- `ISSUES.md` documenting flagged items for handoff
+- `env.example` for mobile app
+- Comprehensive `README.md` with architecture, setup, and deployment docs
+
+### Changed
+- Migrated container registry from Docker Hub (personal) to GitHub Container Registry (org-owned)
+- Excluded unfinished mobile app from npm workspaces to fix dependency hoisting conflicts
+- Fixed map attribution to show correct provider (Google vs MapTiler) based on key availability
+- Added Astro `base: '/photo-log'` for Azure Front Door routing compatibility
+- Removed React version override that was causing vite/zod resolution failures in CI
+- Transferred repository to HWC Engineering organization
+
+### Removed
+- Old `backend.yml` workflow (Docker Hub, personal account)
+- Old `frontend.yml` workflow (debug steps, manual API URL)
+- Committed secrets from `.env` files
+
+### Technical
 - Zoom and pan functionality in photo lightbox viewer
 - Mouse wheel zoom, pinch-to-zoom on mobile, and zoom control buttons
 - Click and drag to pan around zoomed images
