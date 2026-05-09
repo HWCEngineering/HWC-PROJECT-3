@@ -40,7 +40,6 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      # Build once, tag with a generic name. Each deploy job re-tags for its container app.
       - name: Build and push API image
         uses: docker/build-push-action@v6
         with:
@@ -265,8 +264,14 @@ jobs:
           action: "upload"
           app_location: "apps/web"
           output_location: "dist"
-          skip_app_build: true
+        env:
+          PUBLIC_API_BASE_URL: ${{ needs.deploy-api-photo-log.outputs.api_url }}
+          PUBLIC_BASE_PATH: ${{ vars.PUBLIC_BASE_PATH }}
+          PUBLIC_SITE_TITLE: ${{ vars.PUBLIC_SITE_TITLE }}
 
+  # ─────────────────────────────────────────────────────────────
+  # Deploy Frontend — crawfordsville-market
+  # ─────────────────────────────────────────────────────────────
   deploy-frontend-crawfordsville:
     name: Deploy Frontend — crawfordsville-market
     runs-on: ubuntu-latest
@@ -303,4 +308,7 @@ jobs:
           action: "upload"
           app_location: "apps/web"
           output_location: "dist"
-          skip_app_build: true
+        env:
+          PUBLIC_API_BASE_URL: ${{ needs.deploy-api-crawfordsville.outputs.api_url }}
+          PUBLIC_BASE_PATH: ${{ vars.PUBLIC_BASE_PATH }}
+          PUBLIC_SITE_TITLE: ${{ vars.PUBLIC_SITE_TITLE }}
