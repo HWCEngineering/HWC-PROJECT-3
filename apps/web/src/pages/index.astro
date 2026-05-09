@@ -1,0 +1,35 @@
+---
+import "../styles/global.css";
+import { HwcHeader } from "@hwc/header";
+import { PhotoMapApp } from "../components/PhotoMapApp.jsx";
+
+const mapTilerKey = import.meta.env.PUBLIC_MAPTILER_API_KEY;
+const mapboxToken = import.meta.env.PUBLIC_MAPBOX_TOKEN;
+const apiBaseUrl = import.meta.env.PUBLIC_API_BASE_URL || "";
+---
+
+<html lang="en">
+	<head>
+		<meta charset="utf-8" />
+		<link rel="icon" type="image/ico+xml" href="/favicon.ico" />
+		<meta name="viewport" content="width=device-width" />
+		<meta name="generator" content={Astro.generator} />
+		<title>HWC Engineering | Photo Log</title>
+	</head>
+	<body>
+		<HwcHeader
+			client:only="react"
+			title="Photo Log"
+			right={null}
+			children={null}
+		/>
+
+		<PhotoMapApp
+			client:only="react"
+			maxZoom={22}
+			apiBaseUrl={apiBaseUrl}
+			mapTilerKey={mapTilerKey}
+			mapboxToken={mapboxToken}
+		/>
+	</body>
+</html>

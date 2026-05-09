@@ -1,0 +1,51 @@
+{
+  "expo": {
+    "name": "HWC Photo Log",
+    "slug": "hwc-photo-log",
+    "version": "1.0.0",
+    "orientation": "default",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "light",
+    "splash": {
+      "image": "./assets/splash.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#292C30"
+    },
+    "assetBundlePatterns": ["**/*"],
+    "ios": {
+      "supportsTablet": false,
+      "bundleIdentifier": "com.hwc.photolog",
+      "infoPlist": {
+        "NSCameraUsageDescription": "HWC Photo Log needs camera access to capture field photos.",
+        "NSPhotoLibraryUsageDescription": "HWC Photo Log needs photo library access to select photos for upload."
+      }
+    },
+    "android": {
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/adaptive-icon.png",
+        "backgroundColor": "#292C30"
+      },
+      "package": "com.hwc.photolog",
+      "permissions": [
+        "CAMERA",
+        "READ_EXTERNAL_STORAGE",
+        "READ_MEDIA_IMAGES"
+      ]
+    },
+    "plugins": [
+      "expo-router",
+      "expo-screen-orientation",
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "HWC Photo Log needs photo library access to select photos for upload.",
+          "cameraPermission": "HWC Photo Log needs camera access to capture field photos."
+        }
+      ]
+    ],
+    "experiments": {
+      "typedRoutes": true
+    },
+    "scheme": "hwc-photo-log"
+  }
+}
