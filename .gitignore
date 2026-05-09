@@ -35,3 +35,6 @@ spec/
 .vercel
 
 apps/*/public/assets/**
+
+# Migration scripts (contain credentials)
+scripts/migrate_*.py
