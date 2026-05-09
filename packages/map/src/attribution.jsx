@@ -1,10 +1,16 @@
-export function MapAttribution({ baseLayer = 'streets' }) {
+export function MapAttribution({ baseLayer = 'streets', mapTilerKey }) {
   const getAttribution = () => {
     switch (baseLayer) {
       case 'satellite':
+        if (mapTilerKey) {
+          return {
+            text: '© MapTiler © OpenStreetMap contributors',
+            url: 'https://www.maptiler.com/copyright/'
+          };
+        }
         return {
-          text: '© MapTiler © OpenStreetMap contributors',
-          url: 'https://www.maptiler.com/copyright/'
+          text: '© Google',
+          url: 'https://www.google.com/permissions/geoguidelines/'
         };
       case 'satellite-mapbox':
         return {

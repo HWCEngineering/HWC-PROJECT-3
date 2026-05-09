@@ -313,7 +313,7 @@ export function HwcMap({
         />
       )}
 
-      {showAttribution && <MapAttribution baseLayer={effectiveBaseLayer} />}
+      {showAttribution && <MapAttribution baseLayer={effectiveBaseLayer} mapTilerKey={mapTilerKey} />}
 
       <MapContainer
         center={initialCenter}
