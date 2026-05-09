@@ -19,7 +19,8 @@ All notable changes to this project will be documented in this file.
 - Migrated container registry from Docker Hub (personal) to GitHub Container Registry (org-owned)
 - Excluded unfinished mobile app from npm workspaces to fix dependency hoisting conflicts
 - Fixed map attribution to show correct provider (Google vs MapTiler) based on key availability
-- Added Astro `base: '/photo-log'` for Azure Front Door routing compatibility
+- Astro base path now driven by `PUBLIC_BASE_PATH` env var for Front Door routing
+- Pass `basePath` to header and map components for correct asset URL resolution
 - Removed React version override that was causing vite/zod resolution failures in CI
 - Transferred repository to HWC Engineering organization
 
