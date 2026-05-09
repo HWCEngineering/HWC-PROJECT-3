@@ -3,7 +3,8 @@
   "private": true,
   "type": "module",
   "workspaces": [
-    "apps/*",
+    "apps/web",
+    "apps/api",
     "packages/*"
   ],
   "scripts": {
@@ -23,11 +24,5 @@
     "react-leaflet": "^5.0.0",
     "react-leaflet-cluster": "^4.0.0",
     "react-zoom-pan-pinch": "^3.7.0"
-  },
-  "overrides": {
-    "@hwc/mobile": {
-      "react": "19.1.0",
-      "react-dom": "19.1.0"
-    }
   }
 }
