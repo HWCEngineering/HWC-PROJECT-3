@@ -23,7 +23,7 @@ A construction progress tracking application that combines interactive mapping w
 │  Azure Container Apps       │◄──────────────┘ (discovered dynamically)
 │  (hwc-photo-log-api)        │
 │  - FastAPI + uvicorn        │
-│  - Environment: HWC-APPS    │
+│  - Environment: LiDAR-CONTAINER │
 │  - Region: eastus2          │
 └─────────┬───────────────────┘
           │
@@ -132,17 +132,16 @@ API docs available at http://localhost:8000/docs (Swagger UI).
 |--------|-------------|
 | `AZURE_CREDENTIALS` | Azure service principal JSON for CLI login |
 | `AZURE_RESOURCE_GROUP` | Azure resource group name |
-| `AZURE_STATIC_WEB_APPS_API_TOKEN` | Deployment token for the Static Web App |
+| `AZURE_CONNECTION_STRING` | Azure Blob Storage connection string |
 | `MONGO_CONNECTION_STRING` | Cosmos DB (MongoDB API) connection string |
-| `AZURE_STORAGE_CONNECTION_STRING` | Azure Blob Storage connection string |
 | `GHCR_READ_TOKEN` | PAT with `read:packages` scope for Container Apps to pull from GHCR |
+| `AZURE_STATIC_WEB_APPS_API_TOKEN` | Deployment token for the Static Web App (repo-level secret) |
 
 ### GitHub Variables (required for CI/CD)
 
 | Variable | Description |
 |----------|-------------|
-| `PUBLIC_MAPTILER_API_KEY` | MapTiler API key for map tiles |
-| `NAME` | Collection/container name (e.g., `hwc-photo-log`) |
+| `NAME` | Collection and blob container name (e.g., `hwc-photo-log`) |
 
 ### Backend Environment (apps/api/.env)
 
@@ -158,14 +157,14 @@ API docs available at http://localhost:8000/docs (Swagger UI).
 | Variable | Description |
 |----------|-------------|
 | `PUBLIC_API_BASE_URL` | Backend API URL (e.g., `http://localhost:8000` for dev) |
-| `PUBLIC_MAPTILER_API_KEY` | MapTiler API key |
+| `PUBLIC_MAPTILER_API_KEY` | MapTiler API key (optional — custom map package provides default tiles) |
 
 ### Mobile Environment (apps/mobile/.env)
 
 | Variable | Description |
 |----------|-------------|
 | `EXPO_PUBLIC_API_BASE_URL` | Backend API URL (use LAN IP for physical devices) |
-| `EXPO_PUBLIC_MAPTILER_KEY` | MapTiler API key |
+| `EXPO_PUBLIC_MAPTILER_KEY` | MapTiler API key (optional) |
 
 ## Build & Run Commands
 
@@ -245,8 +244,8 @@ az cosmosdb mongodb database create --account-name <COSMOS_ACCOUNT> --resource-g
 az storage account create --name <STORAGE_ACCOUNT> --resource-group <RESOURCE_GROUP> --location eastus2 --sku Standard_LRS
 az storage container create --name hwc-photo-log --account-name <STORAGE_ACCOUNT> --public-access off
 
-# Create Container App Environment
-az containerapp env create --name HWC-APPS --resource-group <RESOURCE_GROUP> --location eastus2
+# Create Container App Environment (you already have "LiDAR-CONTAINER")
+az containerapp env create --name LiDAR-CONTAINER --resource-group <RESOURCE_GROUP> --location eastus2
 
 # Create Static Web App
 az staticwebapp create --name hwc-survey-photo-log --resource-group <RESOURCE_GROUP> --location eastus2

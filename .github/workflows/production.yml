@@ -9,7 +9,7 @@ env:
   REGISTRY: ghcr.io
   IMAGE_NAME: ${{ github.repository_owner }}/hwc-photo-log-api
   CONTAINER_NAME: hwc-photo-log-api
-  CONTAINER_APP_ENV: HWC-APPS
+  CONTAINER_APP_ENV: LiDAR-CONTAINER
   STATIC_WEB_APP_NAME: hwc-survey-photo-log
   LOCATION: eastus2
 
@@ -107,7 +107,7 @@ jobs:
                 PORT=8000 \
                 MONGO_CONNECTION_STRING="${{ secrets.MONGO_CONNECTION_STRING }}" \
                 MONGO_COLLECTION_NAME="${{ vars.NAME }}" \
-                AZURE_STORAGE_CONNECTION_STRING="${{ secrets.AZURE_STORAGE_CONNECTION_STRING }}" \
+                AZURE_STORAGE_CONNECTION_STRING="${{ secrets.AZURE_CONNECTION_STRING }}" \
                 AZURE_STORAGE_CONTAINER_NAME="${{ vars.NAME }}"
           else
             echo "Creating new Container App..."
@@ -129,7 +129,7 @@ jobs:
                 PORT=8000 \
                 MONGO_CONNECTION_STRING="${{ secrets.MONGO_CONNECTION_STRING }}" \
                 MONGO_COLLECTION_NAME="${{ vars.NAME }}" \
-                AZURE_STORAGE_CONNECTION_STRING="${{ secrets.AZURE_STORAGE_CONNECTION_STRING }}" \
+                AZURE_STORAGE_CONNECTION_STRING="${{ secrets.AZURE_CONNECTION_STRING }}" \
                 AZURE_STORAGE_CONTAINER_NAME="${{ vars.NAME }}"
           fi
 
@@ -181,7 +181,6 @@ jobs:
       - name: Build frontend
         env:
           PUBLIC_API_BASE_URL: ${{ needs.deploy-api.outputs.api_url }}
-          PUBLIC_MAPTILER_API_KEY: ${{ vars.PUBLIC_MAPTILER_API_KEY }}
         run: npm run build
 
       # Deploy the built static site to Azure Static Web Apps
@@ -194,4 +193,3 @@ jobs:
           output_location: "dist"
         env:
           PUBLIC_API_BASE_URL: ${{ needs.deploy-api.outputs.api_url }}
-          PUBLIC_MAPTILER_API_KEY: ${{ vars.PUBLIC_MAPTILER_API_KEY }}
