@@ -265,10 +265,8 @@ jobs:
           action: "upload"
           app_location: "apps/web"
           output_location: "dist"
+          skip_app_build: true
 
-  # ─────────────────────────────────────────────────────────────
-  # Deploy Frontend — crawfordsville-market
-  # ─────────────────────────────────────────────────────────────
   deploy-frontend-crawfordsville:
     name: Deploy Frontend — crawfordsville-market
     runs-on: ubuntu-latest
@@ -305,3 +303,4 @@ jobs:
           action: "upload"
           app_location: "apps/web"
           output_location: "dist"
+          skip_app_build: true
