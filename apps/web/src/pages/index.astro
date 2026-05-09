@@ -7,6 +7,7 @@ const mapTilerKey = import.meta.env.PUBLIC_MAPTILER_API_KEY;
 const mapboxToken = import.meta.env.PUBLIC_MAPBOX_TOKEN;
 const apiBaseUrl = import.meta.env.PUBLIC_API_BASE_URL || "";
 const siteTitle = process.env.PUBLIC_SITE_TITLE || "Photo Log";
+const basePath = process.env.PUBLIC_BASE_PATH || "";
 ---
 
 <html lang="en">
@@ -21,6 +22,7 @@ const siteTitle = process.env.PUBLIC_SITE_TITLE || "Photo Log";
 		<HwcHeader
 			client:only="react"
 			title={siteTitle}
+			basePath={basePath}
 			right={null}
 			children={null}
 		/>
@@ -31,6 +33,7 @@ const siteTitle = process.env.PUBLIC_SITE_TITLE || "Photo Log";
 			apiBaseUrl={apiBaseUrl}
 			mapTilerKey={mapTilerKey}
 			mapboxToken={mapboxToken}
+			basePath={basePath}
 		/>
 	</body>
 </html>

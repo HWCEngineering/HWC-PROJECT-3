@@ -10,7 +10,8 @@ export function MapWrapper({
   apiBaseUrl,
   maxZoom = 22,
   filters = {},
-  onVisiblePhotosChange // New prop to notify parent of visible photos
+  onVisiblePhotosChange,
+  basePath = ""
 }) {
   const [baseLayer, setBaseLayer] = useState('streets');
   const [photoMarkers, setPhotoMarkers] = useState([]);
@@ -113,6 +114,7 @@ export function MapWrapper({
         disableClusteringAtZoom: 22
       }}
       maxZoom={maxZoom}
+      basePath={basePath}
     />
   );
 }
