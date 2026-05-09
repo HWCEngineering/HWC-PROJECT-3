@@ -8,6 +8,9 @@ All notable changes to this project will be documented in this file.
 - Production CI/CD workflow with GHCR + Azure Container Apps + Azure Static Web Apps
 - Dev branch CI workflow (lint, build, validate)
 - Automatic API URL discovery — frontend build no longer requires manual URL updates
+- Multi-project deployment via GitHub Environments (photo-log + crawfordsville-market)
+- Environment-driven base path (`PUBLIC_BASE_PATH`) for Front Door routing
+- Environment-driven site title (`PUBLIC_SITE_TITLE`) for per-project branding
 - `ISSUES.md` documenting flagged items for handoff
 - `env.example` for mobile app
 - Comprehensive `README.md` with architecture, setup, and deployment docs

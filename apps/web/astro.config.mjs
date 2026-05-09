@@ -6,6 +6,6 @@ import react from '@astrojs/react';
 // https://astro.build/config
 export default defineConfig({
   integrations: [react()],
-  base: '/photo-log',
+  base: process.env.PUBLIC_BASE_PATH || '/',
   trailingSlash: 'ignore'
 });

@@ -6,6 +6,7 @@ import { PhotoMapApp } from "../components/PhotoMapApp.jsx";
 const mapTilerKey = import.meta.env.PUBLIC_MAPTILER_API_KEY;
 const mapboxToken = import.meta.env.PUBLIC_MAPBOX_TOKEN;
 const apiBaseUrl = import.meta.env.PUBLIC_API_BASE_URL || "";
+const siteTitle = process.env.PUBLIC_SITE_TITLE || "Photo Log";
 ---
 
 <html lang="en">
@@ -14,12 +15,12 @@ const apiBaseUrl = import.meta.env.PUBLIC_API_BASE_URL || "";
 		<link rel="icon" type="image/ico+xml" href="/favicon.ico" />
 		<meta name="viewport" content="width=device-width" />
 		<meta name="generator" content={Astro.generator} />
-		<title>HWC Engineering | Photo Log</title>
+		<title>HWC Engineering | {siteTitle}</title>
 	</head>
 	<body>
 		<HwcHeader
 			client:only="react"
-			title="Photo Log"
+			title={siteTitle}
 			right={null}
 			children={null}
 		/>

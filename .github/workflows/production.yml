@@ -7,39 +7,29 @@ on:
 
 env:
   REGISTRY: ghcr.io
-  IMAGE_NAME: ${{ github.repository_owner }}/hwc-photo-log-api
-  CONTAINER_NAME: hwc-photo-log-api
   CONTAINER_APP_ENV: LiDAR-CONTAINER
-  STATIC_WEB_APP_NAME: hwc-survey-photo-log
   LOCATION: eastus2
 
 jobs:
   # ─────────────────────────────────────────────────────────────
-  # Job 1: Build API image, push to GHCR, deploy to Container App
+  # Build the shared API image once (same code for all projects)
   # ─────────────────────────────────────────────────────────────
-  deploy-api:
-    name: Deploy API to Azure Container Apps
+  build-api-image:
+    name: Build API Image
     runs-on: ubuntu-latest
     permissions:
       contents: read
       packages: write
     outputs:
-      # This output is consumed by deploy-frontend to set PUBLIC_API_BASE_URL
-      api_url: ${{ steps.capture-url.outputs.api_url }}
+      image_tag: ${{ github.sha }}
 
     steps:
       - name: Checkout
         uses: actions/checkout@v4
 
-      # Lowercase the image name (GHCR requires lowercase)
-      - name: Set lowercase image name
-        run: |
-          echo "IMAGE_NAME_LC=${IMAGE_NAME,,}" >> "$GITHUB_ENV"
-
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
 
-      # Authenticate to GitHub Container Registry using the built-in GITHUB_TOKEN
       - name: Log in to GHCR
         uses: docker/login-action@v3
         with:
@@ -47,60 +37,53 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      # Build and push with SHA tag (immutable) and latest tag
+      # Build once, tag with a generic name. Each deploy job re-tags for its container app.
       - name: Build and push API image
         uses: docker/build-push-action@v6
         with:
           context: apps/api
           push: true
           tags: |
-            ghcr.io/${{ env.IMAGE_NAME_LC }}:${{ github.sha }}
-            ghcr.io/${{ env.IMAGE_NAME_LC }}:latest
+            ghcr.io/${{ github.repository_owner }}/hwc-photo-log-api:${{ github.sha }}
+            ghcr.io/${{ github.repository_owner }}/hwc-photo-log-api:latest
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
-      # Authenticate to Azure for Container App deployment
+  # ─────────────────────────────────────────────────────────────
+  # Deploy API — photo-log
+  # ─────────────────────────────────────────────────────────────
+  deploy-api-photo-log:
+    name: Deploy API — photo-log
+    runs-on: ubuntu-latest
+    needs: build-api-image
+    environment: photo-log
+    outputs:
+      api_url: ${{ steps.capture-url.outputs.api_url }}
+
+    steps:
       - name: Log in to Azure
         uses: azure/login@v1
         with:
           creds: ${{ secrets.AZURE_CREDENTIALS }}
 
-      # Ensure the Container App Environment exists before deploying
-      - name: Ensure Container App Environment exists
+      - name: Deploy Container App
         run: |
-          if ! az containerapp env show \
-            --name "${{ env.CONTAINER_APP_ENV }}" \
-            --resource-group "${{ secrets.AZURE_RESOURCE_GROUP }}" >/dev/null 2>&1; then
-            echo "Creating Container App Environment: ${{ env.CONTAINER_APP_ENV }}"
-            az containerapp env create \
-              --name "${{ env.CONTAINER_APP_ENV }}" \
-              --resource-group "${{ secrets.AZURE_RESOURCE_GROUP }}" \
-              --location "${{ env.LOCATION }}"
-          else
-            echo "Container App Environment already exists."
-          fi
-
-      # Create or update the Container App with the new image
-      - name: Create or update API Container App
-        run: |
-          IMAGE="ghcr.io/${{ env.IMAGE_NAME_LC }}:${{ github.sha }}"
+          CONTAINER_NAME="${{ vars.NAME }}-api"
+          IMAGE="ghcr.io/${{ github.repository_owner }}/hwc-photo-log-api:${{ github.sha }}"
 
           if az containerapp show \
-            --name "${{ env.CONTAINER_NAME }}" \
+            --name "$CONTAINER_NAME" \
             --resource-group "${{ secrets.AZURE_RESOURCE_GROUP }}" >/dev/null 2>&1; then
 
-            echo "Updating existing Container App..."
-
-            # Update registry credentials for GHCR
             az containerapp registry set \
-              --name "${{ env.CONTAINER_NAME }}" \
+              --name "$CONTAINER_NAME" \
               --resource-group "${{ secrets.AZURE_RESOURCE_GROUP }}" \
               --server ghcr.io \
               --username "${{ github.repository_owner }}" \
               --password "${{ secrets.GHCR_READ_TOKEN }}"
 
             az containerapp update \
-              --name "${{ env.CONTAINER_NAME }}" \
+              --name "$CONTAINER_NAME" \
               --resource-group "${{ secrets.AZURE_RESOURCE_GROUP }}" \
               --image "$IMAGE" \
               --set-env-vars \
@@ -110,9 +93,8 @@ jobs:
                 AZURE_STORAGE_CONNECTION_STRING="${{ secrets.AZURE_CONNECTION_STRING }}" \
                 AZURE_STORAGE_CONTAINER_NAME="${{ vars.NAME }}"
           else
-            echo "Creating new Container App..."
             az containerapp create \
-              --name "${{ env.CONTAINER_NAME }}" \
+              --name "$CONTAINER_NAME" \
               --resource-group "${{ secrets.AZURE_RESOURCE_GROUP }}" \
               --environment "${{ env.CONTAINER_APP_ENV }}" \
               --image "$IMAGE" \
@@ -133,13 +115,12 @@ jobs:
                 AZURE_STORAGE_CONTAINER_NAME="${{ vars.NAME }}"
           fi
 
-      # Dynamically retrieve the deployed API URL — this eliminates the need
-      # for manual PUBLIC_API_BASE_URL updates between deployments
       - name: Capture API URL
         id: capture-url
         run: |
+          CONTAINER_NAME="${{ vars.NAME }}-api"
           API_FQDN=$(az containerapp show \
-            --name "${{ env.CONTAINER_NAME }}" \
+            --name "$CONTAINER_NAME" \
             --resource-group "${{ secrets.AZURE_RESOURCE_GROUP }}" \
             --query "properties.configuration.ingress.fqdn" \
             -o tsv)
@@ -150,15 +131,100 @@ jobs:
           fi
 
           echo "api_url=https://$API_FQDN" >> "$GITHUB_OUTPUT"
-          echo "✅ API deployed at: https://$API_FQDN"
+          echo "✅ $CONTAINER_NAME → https://$API_FQDN"
 
   # ─────────────────────────────────────────────────────────────
-  # Job 2: Build frontend with discovered API URL, deploy to SWA
+  # Deploy API — crawfordsville-market
   # ─────────────────────────────────────────────────────────────
-  deploy-frontend:
-    name: Deploy Frontend to Azure Static Web Apps
+  deploy-api-crawfordsville:
+    name: Deploy API — crawfordsville-market
     runs-on: ubuntu-latest
-    needs: deploy-api
+    needs: build-api-image
+    environment: crawfordsville-market
+    outputs:
+      api_url: ${{ steps.capture-url.outputs.api_url }}
+
+    steps:
+      - name: Log in to Azure
+        uses: azure/login@v1
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+      - name: Deploy Container App
+        run: |
+          CONTAINER_NAME="${{ vars.NAME }}-api"
+          IMAGE="ghcr.io/${{ github.repository_owner }}/hwc-photo-log-api:${{ github.sha }}"
+
+          if az containerapp show \
+            --name "$CONTAINER_NAME" \
+            --resource-group "${{ secrets.AZURE_RESOURCE_GROUP }}" >/dev/null 2>&1; then
+
+            az containerapp registry set \
+              --name "$CONTAINER_NAME" \
+              --resource-group "${{ secrets.AZURE_RESOURCE_GROUP }}" \
+              --server ghcr.io \
+              --username "${{ github.repository_owner }}" \
+              --password "${{ secrets.GHCR_READ_TOKEN }}"
+
+            az containerapp update \
+              --name "$CONTAINER_NAME" \
+              --resource-group "${{ secrets.AZURE_RESOURCE_GROUP }}" \
+              --image "$IMAGE" \
+              --set-env-vars \
+                PORT=8000 \
+                MONGO_CONNECTION_STRING="${{ secrets.MONGO_CONNECTION_STRING }}" \
+                MONGO_COLLECTION_NAME="${{ vars.NAME }}" \
+                AZURE_STORAGE_CONNECTION_STRING="${{ secrets.AZURE_CONNECTION_STRING }}" \
+                AZURE_STORAGE_CONTAINER_NAME="${{ vars.NAME }}"
+          else
+            az containerapp create \
+              --name "$CONTAINER_NAME" \
+              --resource-group "${{ secrets.AZURE_RESOURCE_GROUP }}" \
+              --environment "${{ env.CONTAINER_APP_ENV }}" \
+              --image "$IMAGE" \
+              --target-port 8000 \
+              --ingress external \
+              --min-replicas 0 \
+              --max-replicas 3 \
+              --cpu 0.5 \
+              --memory 1.0Gi \
+              --registry-server ghcr.io \
+              --registry-username "${{ github.repository_owner }}" \
+              --registry-password "${{ secrets.GHCR_READ_TOKEN }}" \
+              --env-vars \
+                PORT=8000 \
+                MONGO_CONNECTION_STRING="${{ secrets.MONGO_CONNECTION_STRING }}" \
+                MONGO_COLLECTION_NAME="${{ vars.NAME }}" \
+                AZURE_STORAGE_CONNECTION_STRING="${{ secrets.AZURE_CONNECTION_STRING }}" \
+                AZURE_STORAGE_CONTAINER_NAME="${{ vars.NAME }}"
+          fi
+
+      - name: Capture API URL
+        id: capture-url
+        run: |
+          CONTAINER_NAME="${{ vars.NAME }}-api"
+          API_FQDN=$(az containerapp show \
+            --name "$CONTAINER_NAME" \
+            --resource-group "${{ secrets.AZURE_RESOURCE_GROUP }}" \
+            --query "properties.configuration.ingress.fqdn" \
+            -o tsv)
+
+          if [ -z "$API_FQDN" ]; then
+            echo "ERROR: Could not determine API FQDN"
+            exit 1
+          fi
+
+          echo "api_url=https://$API_FQDN" >> "$GITHUB_OUTPUT"
+          echo "✅ $CONTAINER_NAME → https://$API_FQDN"
+
+  # ─────────────────────────────────────────────────────────────
+  # Deploy Frontend — photo-log
+  # ─────────────────────────────────────────────────────────────
+  deploy-frontend-photo-log:
+    name: Deploy Frontend — photo-log
+    runs-on: ubuntu-latest
+    needs: deploy-api-photo-log
+    environment: photo-log
 
     steps:
       - name: Checkout
@@ -176,14 +242,13 @@ jobs:
       - name: Sync assets
         run: npm run assets:sync
 
-      # Build with the API URL discovered from the deploy-api job.
-      # This is the key step that eliminates manual URL management.
       - name: Build frontend
         env:
-          PUBLIC_API_BASE_URL: ${{ needs.deploy-api.outputs.api_url }}
+          PUBLIC_API_BASE_URL: ${{ needs.deploy-api-photo-log.outputs.api_url }}
+          PUBLIC_BASE_PATH: ${{ vars.PUBLIC_BASE_PATH }}
+          PUBLIC_SITE_TITLE: ${{ vars.PUBLIC_SITE_TITLE }}
         run: npm run build
 
-      # Deploy the built static site to Azure Static Web Apps
       - name: Deploy to Azure Static Web Apps
         uses: Azure/static-web-apps-deploy@v1
         with:
@@ -191,5 +256,43 @@ jobs:
           action: "upload"
           app_location: "apps/web"
           output_location: "dist"
+
+  # ─────────────────────────────────────────────────────────────
+  # Deploy Frontend — crawfordsville-market
+  # ─────────────────────────────────────────────────────────────
+  deploy-frontend-crawfordsville:
+    name: Deploy Frontend — crawfordsville-market
+    runs-on: ubuntu-latest
+    needs: deploy-api-crawfordsville
+    environment: crawfordsville-market
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: "npm"
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Sync assets
+        run: npm run assets:sync
+
+      - name: Build frontend
         env:
-          PUBLIC_API_BASE_URL: ${{ needs.deploy-api.outputs.api_url }}
+          PUBLIC_API_BASE_URL: ${{ needs.deploy-api-crawfordsville.outputs.api_url }}
+          PUBLIC_BASE_PATH: ${{ vars.PUBLIC_BASE_PATH }}
+          PUBLIC_SITE_TITLE: ${{ vars.PUBLIC_SITE_TITLE }}
+        run: npm run build
+
+      - name: Deploy to Azure Static Web Apps
+        uses: Azure/static-web-apps-deploy@v1
+        with:
+          azure_static_web_apps_api_token: ${{ secrets.AZURE_STATIC_WEB_APPS_API_TOKEN }}
+          action: "upload"
+          app_location: "apps/web"
+          output_location: "dist"

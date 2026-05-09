@@ -128,6 +128,8 @@ API docs available at http://localhost:8000/docs (Swagger UI).
 
 ### GitHub Secrets (required for CI/CD)
 
+Org-level secrets (shared across all environments):
+
 | Secret | Description |
 |--------|-------------|
 | `AZURE_CREDENTIALS` | Azure service principal JSON for CLI login |
@@ -135,13 +137,20 @@ API docs available at http://localhost:8000/docs (Swagger UI).
 | `AZURE_CONNECTION_STRING` | Azure Blob Storage connection string |
 | `MONGO_CONNECTION_STRING` | Cosmos DB (MongoDB API) connection string |
 | `GHCR_READ_TOKEN` | PAT with `read:packages` scope for Container Apps to pull from GHCR |
-| `AZURE_STATIC_WEB_APPS_API_TOKEN` | Deployment token for the Static Web App (repo-level secret) |
 
-### GitHub Variables (required for CI/CD)
+Environment-level secrets (per project):
+
+| Secret | Description |
+|--------|-------------|
+| `AZURE_STATIC_WEB_APPS_API_TOKEN` | Deployment token for the project's Static Web App |
+
+### GitHub Variables (per environment)
 
 | Variable | Description |
 |----------|-------------|
-| `NAME` | Collection and blob container name (e.g., `hwc-photo-log`) |
+| `NAME` | Collection/container name and container app prefix |
+| `PUBLIC_BASE_PATH` | Front Door route path for this project |
+| `PUBLIC_SITE_TITLE` | (Optional) Custom title for header and page |
 
 ### Backend Environment (apps/api/.env)
 
@@ -286,12 +295,34 @@ Store the `apiKey` value as `AZURE_STATIC_WEB_APPS_API_TOKEN` in GitHub Secrets.
 
 ## Environment Separation
 
-| Aspect | Dev | Production |
-|--------|-----|------------|
-| Branch | `dev` | `main` |
-| Deployment | None (CI only) | Azure |
-| API URL | `http://localhost:8000` | Auto-discovered from Container App |
-| Database | Local or dev Cosmos DB | Production Cosmos DB |
+This repo deploys multiple project instances from a single codebase using GitHub Environments.
+
+| Environment | `photo-log` | `crawfordsville-market` |
+|-------------|-------------|------------------------|
+| Branch | `main` | `main` |
+| Base Path | `/photo-log` | `/2500-555-A` |
+| Site Title | Photo Log (default) | Crawfordsville Market Street RR Grade Separation |
+| Container App | `hwc-photo-log-api` | `photo-log-crawfordsville-mkt-st-api` |
+| SWA | `hwc-survey-photo-log` | (Crawfordsville SWA) |
+| Data (NAME) | `hwc-photo-log` | `photo-log-crawfordsville-mkt-st` |
+
+### Adding a New Project
+
+1. Create a GitHub Environment with a unique name
+2. Add environment secrets: `AZURE_STATIC_WEB_APPS_API_TOKEN`
+3. Add environment variables: `NAME`, `PUBLIC_BASE_PATH`, `PUBLIC_SITE_TITLE`
+4. Create the Azure resources (SWA, blob container, Cosmos collection)
+5. Add a new deploy job pair in `production.yml` (copy an existing one, change the environment name)
+6. Add a Front Door route for the new base path
+
+### Environment Variables (per environment)
+
+| Variable | Description | Required |
+|----------|-------------|----------|
+| `NAME` | Collection/container name — also used as container app prefix (`{NAME}-api`) | Yes |
+| `PUBLIC_BASE_PATH` | Front Door route path (e.g., `/photo-log`) | Yes |
+| `PUBLIC_SITE_TITLE` | Header and page title | No (defaults to "Photo Log") |
+| `AZURE_STATIC_WEB_APPS_API_TOKEN` | SWA deployment token (secret) | Yes |
 
 ## How API URL Auto-Discovery Works
 
