@@ -1,6 +1,31 @@
 # HWC Photo Log
 
-A construction progress tracking application that combines interactive mapping with photo documentation. Built for the Crawfordsville Market Street project.
+A geo-tagged photo management platform for construction project documentation, built for HWC Engineering field teams.
+
+## Overview
+
+Construction projects generate thousands of site photos over months or years, but without location context and organization they're difficult to search, reference, or share. HWC Photo Log solves this by extracting GPS coordinates from photo EXIF data at upload time and plotting them on an interactive map, giving engineers and inspectors a spatial view of project progress.
+
+**Inputs:** Site photos (JPEG, PNG, HEIC) uploaded via the web interface — GPS coordinates, timestamps, and orientation are extracted automatically from EXIF metadata. Users can add descriptions and tags for filtering.
+
+**Outputs:** An interactive map with clustered photo markers, a filterable photo browser synced to the map viewport, and export capabilities (ZIP archives, KML/KMZ for Google Earth).
+
+**Pipeline:**
+```
+Photo upload → EXIF extraction (GPS, timestamp) → HEIC→JPEG conversion →
+Thumbnail generation → Store image in Azure Blob → Store metadata in Cosmos DB →
+Serve via API → Render on interactive Leaflet map
+```
+
+**Tech stack:**
+- Frontend: Astro, React 19, Leaflet (map), react-zoom-pan-pinch (lightbox)
+- Backend: Python FastAPI, uvicorn
+- Storage: Azure Blob Storage (images), Azure Cosmos DB/MongoDB API (metadata)
+- Hosting: Azure Static Web Apps (frontend), Azure Container Apps (API)
+- CI/CD: GitHub Actions, GitHub Container Registry
+- Routing: Azure Front Door (multi-project path-based routing)
+
+The platform supports multiple project deployments from a single codebase using GitHub Environments — each project gets its own database, storage container, API instance, and frontend with a custom title and URL path.
 
 ## Architecture
 
