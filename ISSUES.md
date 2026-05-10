@@ -37,7 +37,7 @@ Items identified during handoff preparation that require attention.
 | # | Issue | Location | Action Required |
 |---|-------|----------|-----------------|
 | 16 | Missing `.env.example` for mobile | `apps/mobile/` | Create `apps/mobile/env.example` with placeholder values. |
-| 17 | Old repo URL in README | Was `MaFalana/HWC-PHOTO-LOG` | Updated to `MaFalana/HWC-PROJECT-3`. |
+| 17 | Old repo URL in README | Was `MaFalana/HWC-PHOTO-LOG` | Updated to `HWCEngineering/HWC-PROJECT-3`. |
 | 18 | No health check endpoint beyond root `/` | `apps/api/main.py` | Root returns JSON — sufficient but consider dedicated `/health`. |
 | 19 | SAS URL expiry is 72 hours | `apps/api/storage/az.py` | May be too long or too short depending on use case. |
 | 20 | `npm run dev` uses `&` (background process) | `package.json` | Works on Unix but not Windows. Consider `concurrently` package. |

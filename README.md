@@ -108,7 +108,7 @@ hwc-photo-log/
 ### 1. Clone and Install
 
 ```bash
-git clone https://github.com/MaFalana/HWC-PROJECT-3.git
+git clone https://github.com/HWCEngineering/HWC-PROJECT-3.git
 cd HWC-PROJECT-3
 npm install
 ```
