@@ -2,7 +2,6 @@ import { useState, useEffect, useCallback } from 'react';
 import { HwcMap } from '@hwc/map';
 
 export function MapWrapper({
-  mapTilerKey,
   mapboxToken,
   selectedPhotoIds = [],
   onMarkerClick,
@@ -99,7 +98,6 @@ export function MapWrapper({
   return (
     <HwcMap
       items={items}
-      mapTilerKey={mapTilerKey}
       mapboxToken={mapboxToken}
       baseLayer={baseLayer}
       onBaseLayerChange={setBaseLayer}

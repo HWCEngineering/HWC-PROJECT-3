@@ -1,5 +1,16 @@
 # @hwc/map Changelog
 
+## [Unreleased]
+
+### Changed
+- `streets` base layer now uses Esri World Street Map instead of OpenStreetMap's tile servers
+- `satellite` base layer now uses Esri World Imagery with Esri road and place-name label layers, replacing MapTiler hybrid and the Google fallback
+- Attribution shows "Powered by Esri" and Esri's data credits for both default layers
+- Attribution text wraps on narrow screens instead of running off the edge
+
+### Removed
+- `mapTilerKey` prop; the default layers no longer need any API key
+
 ## [0.1.0] - 2026-03-03
 
 ### Added

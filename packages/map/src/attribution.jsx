@@ -1,16 +1,20 @@
-export function MapAttribution({ baseLayer = 'streets', mapTilerKey }) {
+// Data credits as published in each Esri service's copyrightText.
+const ESRI_STREETS_CREDITS =
+  'Sources: Esri, HERE, Garmin, USGS, Intermap, INCREMENT P, NRCan, Esri Japan, METI, ' +
+  'Esri China (Hong Kong), Esri Korea, Esri (Thailand), NGCC, © OpenStreetMap contributors, ' +
+  'and the GIS User Community';
+const ESRI_HYBRID_CREDITS =
+  'Source: Esri, Vantor, Earthstar Geographics, and the GIS User Community | ' +
+  'Labels: Esri, HERE, Garmin, © OpenStreetMap contributors';
+
+export function MapAttribution({ baseLayer = 'streets' }) {
   const getAttribution = () => {
     switch (baseLayer) {
       case 'satellite':
-        if (mapTilerKey) {
-          return {
-            text: '© MapTiler © OpenStreetMap contributors',
-            url: 'https://www.maptiler.com/copyright/'
-          };
-        }
         return {
-          text: '© Google',
-          url: 'https://www.google.com/permissions/geoguidelines/'
+          text: ESRI_HYBRID_CREDITS,
+          url: 'https://www.esri.com/en-us/legal/terms/data-attributions',
+          poweredByEsri: true
         };
       case 'satellite-mapbox':
         return {
@@ -25,8 +29,9 @@ export function MapAttribution({ baseLayer = 'streets', mapTilerKey }) {
       case 'streets':
       default:
         return {
-          text: '© OpenStreetMap contributors',
-          url: 'https://www.openstreetmap.org/'
+          text: ESRI_STREETS_CREDITS,
+          url: 'https://www.esri.com/en-us/legal/terms/data-attributions',
+          poweredByEsri: true
         };
     }
   };
@@ -39,6 +44,14 @@ export function MapAttribution({ baseLayer = 'streets', mapTilerKey }) {
         <b>© {new Date().getFullYear()} HWC Engineering</b>
       </a>
       {' | '}
+      {attribution.poweredByEsri && (
+        <>
+          <a href="https://www.esri.com/" target="_blank" rel="noopener noreferrer" style={{ color: 'inherit' }}>
+            Powered by Esri
+          </a>
+          {' | '}
+        </>
+      )}
       <a
         href={attribution.url}
         target="_blank"

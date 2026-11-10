@@ -122,7 +122,7 @@ cp apps/api/env.example apps/api/.env
 
 # Frontend
 cp apps/web/env.example apps/web/.env
-# Edit apps/web/.env with your API URL and MapTiler key
+# Edit apps/web/.env with your API URL
 ```
 
 ### 3. Run Development Servers
@@ -191,14 +191,13 @@ Environment-level secrets (per project):
 | Variable | Description |
 |----------|-------------|
 | `PUBLIC_API_BASE_URL` | Backend API URL (e.g., `http://localhost:8000` for dev) |
-| `PUBLIC_MAPTILER_API_KEY` | MapTiler API key (optional — custom map package provides default tiles) |
+| `PUBLIC_MAPBOX_TOKEN` | (Optional) Mapbox token, only for the `satellite-mapbox` layer. Default map tiles come from Esri and need no key |
 
 ### Mobile Environment (apps/mobile/.env)
 
 | Variable | Description |
 |----------|-------------|
 | `EXPO_PUBLIC_API_BASE_URL` | Backend API URL (use LAN IP for physical devices) |
-| `EXPO_PUBLIC_MAPTILER_KEY` | MapTiler API key (optional) |
 
 ## Build & Run Commands
 

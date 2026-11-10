@@ -209,22 +209,24 @@ Example:
 
 ## Base Layers
 
-Multiple tile providers are available with consistent max zoom support:
+The default layers (`streets`, `satellite`) use Esri's ArcGIS Online tile services from
+`server.arcgisonline.com`. They need no API key. Esri has these services in "mature support"
+(maintained but no longer developed), and its terms of use apply. If they are retired, the
+replacement is Esri's key-based Static Basemap Tiles service.
 
-### Streets (OpenStreetMap)
-- **Provider**: OpenStreetMap
-- **Cost**: Free, unlimited
+### Streets (`streets`, default)
+- **Provider**: Esri World Street Map
+- **Setup**: None (no API key)
 - **Coverage**: Global
-- **Max Zoom**: Configurable (default 22, tiles available to ~19)
-- **Best for**: Street maps with labels
+- **Max Zoom**: Configurable (default 22; native tiles to 19, scaled up above that)
+- **Attribution**: "Powered by Esri" plus Esri's data credits, which include OpenStreetMap contributors
 
-### Satellite (ESRI World Imagery)
-- **Provider**: ESRI/Maxar
-- **Cost**: Free, unlimited (no API key needed)
-- **Quality**: High resolution
+### Satellite (`satellite`)
+- **Provider**: Esri World Imagery, with Esri World Transportation and World Boundaries and Places label layers on top
+- **Setup**: None (no API key)
 - **Coverage**: Global
-- **Max Zoom**: Configurable (default 22, tiles available to ~19)
-- **Best for**: Free satellite imagery
+- **Max Zoom**: Configurable (default 22; native tiles to 19, scaled up above that)
+- **Attribution**: "Powered by Esri" plus Esri, Vantor, Earthstar Geographics imagery credits
 
 ### Satellite (Mapbox)
 - **Provider**: Mapbox
