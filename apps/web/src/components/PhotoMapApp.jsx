@@ -4,7 +4,7 @@ import { PhotoBrowserWrapper } from './PhotoBrowserWrapper.jsx';
 import { MapWrapper } from './MapWrapper.jsx';
 import { PhotoLightbox } from '@hwc/photo-panel';
 
-export function PhotoMapApp({ apiBaseUrl, mapTilerKey, mapboxToken, maxZoom = 22, basePath = "" }) {
+export function PhotoMapApp({ apiBaseUrl, mapboxToken, maxZoom = 22, basePath = "" }) {
   // Shared state between map and photo panel
   const [selectedPhotoIds, setSelectedPhotoIds] = useState([]);
   const [highlightedPhotoId, setHighlightedPhotoId] = useState(null);
@@ -201,7 +201,6 @@ export function PhotoMapApp({ apiBaseUrl, mapTilerKey, mapboxToken, maxZoom = 22
       {/* Map */}
       <div style={{ height: '93vh' }}>
         <MapWrapper
-          mapTilerKey={mapTilerKey}
           mapboxToken={mapboxToken}
           selectedPhotoIds={selectedPhotoIds}
           onMarkerClick={handleMarkerClick}

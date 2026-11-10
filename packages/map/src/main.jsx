@@ -8,6 +8,16 @@ import "./map.css";
 import { LayerToggle, ZoomControls } from "./controls.jsx";
 import { MapAttribution } from "./attribution.jsx";
 
+// Esri ArcGIS Online tile services (no API key required).
+// Note: Esri uses {z}/{y}/{x} order (row before column), unlike most providers.
+const ESRI_TILES = "https://server.arcgisonline.com/ArcGIS/rest/services";
+const ESRI_STREETS_URL = `${ESRI_TILES}/World_Street_Map/MapServer/tile/{z}/{y}/{x}`;
+const ESRI_IMAGERY_URL = `${ESRI_TILES}/World_Imagery/MapServer/tile/{z}/{y}/{x}`;
+const ESRI_TRANSPORTATION_URL = `${ESRI_TILES}/Reference/World_Transportation/MapServer/tile/{z}/{y}/{x}`;
+const ESRI_PLACES_URL = `${ESRI_TILES}/Reference/World_Boundaries_and_Places/MapServer/tile/{z}/{y}/{x}`;
+// Esri caches tiles to ~z19 in most areas; above that Leaflet scales up the z19 tiles.
+const ESRI_MAX_NATIVE_ZOOM = 19;
+
 /**
  * Canonical item shape (default):
  *   { id, lat, lon, name? }
@@ -173,7 +183,6 @@ export function HwcMap({
   // Layers
   baseLayer,
   onBaseLayerChange,
-  mapTilerKey,
   mapboxToken,
 
   // Ortho overlay
@@ -195,8 +204,7 @@ export function HwcMap({
 }) {
   const [isMobile, setIsMobile] = useState(false);
 
-  // Default base layer: if MapTiler key exists, prefer streets, else satellite
-  const effectiveBaseLayer = baseLayer ?? (mapTilerKey ? "streets" : "satellite");
+  const effectiveBaseLayer = baseLayer ?? "streets";
 
   useEffect(() => {
     if (typeof window === "undefined") return;
@@ -298,7 +306,7 @@ export function HwcMap({
     // Multiple tile provider options with consistent max zoom
     return [
       { key: "streets", label: "Streets" },
-      { key: "satellite", label: "Hybrid (MapTiler)" }
+      { key: "satellite", label: "Satellite" }
     ];
   }, []);
 
@@ -313,7 +321,7 @@ export function HwcMap({
         />
       )}
 
-      {showAttribution && <MapAttribution baseLayer={effectiveBaseLayer} mapTilerKey={mapTilerKey} />}
+      {showAttribution && <MapAttribution baseLayer={effectiveBaseLayer} />}
 
       <MapContainer
         center={initialCenter}
@@ -331,31 +339,35 @@ export function HwcMap({
       >
         {effectiveBaseLayer === "streets" && (
           <TileLayer
-            key="streets"
-            url="https://tile.openstreetmap.org/{z}/{x}/{y}.png"
-            attribution="&copy; OpenStreetMap contributors"
-            maxZoom={19}
-            maxNativeZoom={19}
+            key="streets-esri"
+            url={ESRI_STREETS_URL}
+            maxZoom={maxZoom}
+            maxNativeZoom={ESRI_MAX_NATIVE_ZOOM}
           />
         )}
 
-        {effectiveBaseLayer === "satellite" && mapTilerKey && (
-          <TileLayer
-            key="satellite-hybrid"
-            url={`https://api.maptiler.com/maps/hybrid/256/{z}/{x}/{y}.jpg?key=${mapTilerKey}`}
-            attribution="&copy; MapTiler &copy; OpenStreetMap contributors"
-            maxZoom={maxZoom}
-          />
-        )}
-
-        {effectiveBaseLayer === "satellite" && !mapTilerKey && (
-          <TileLayer
-            key="satellite-google-fallback"
-            url="https://mt1.google.com/vt/lyrs=y&x={x}&y={y}&z={z}"
-            attribution="&copy; Google"
-            maxZoom={maxZoom}
-            subdomains={['mt0', 'mt1', 'mt2', 'mt3']}
-          />
+        {/* Hybrid: imagery with Esri road and place-name reference layers on top */}
+        {effectiveBaseLayer === "satellite" && (
+          <>
+            <TileLayer
+              key="satellite-esri"
+              url={ESRI_IMAGERY_URL}
+              maxZoom={maxZoom}
+              maxNativeZoom={ESRI_MAX_NATIVE_ZOOM}
+            />
+            <TileLayer
+              key="satellite-esri-transportation"
+              url={ESRI_TRANSPORTATION_URL}
+              maxZoom={maxZoom}
+              maxNativeZoom={ESRI_MAX_NATIVE_ZOOM}
+            />
+            <TileLayer
+              key="satellite-esri-places"
+              url={ESRI_PLACES_URL}
+              maxZoom={maxZoom}
+              maxNativeZoom={ESRI_MAX_NATIVE_ZOOM}
+            />
+          </>
         )}
 
         {effectiveBaseLayer === "satellite-mapbox" && mapboxToken && (

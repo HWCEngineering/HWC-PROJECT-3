@@ -35,7 +35,6 @@ jobs:
         env:
           # Use placeholder URL for CI build validation
           PUBLIC_API_BASE_URL: "https://placeholder.azurecontainerapps.io"
-          PUBLIC_MAPTILER_API_KEY: "ci-placeholder"
         run: npm run build
 
   ci-backend:

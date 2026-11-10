@@ -16,6 +16,7 @@ All notable changes to this project will be documented in this file.
 - Comprehensive `README.md` with architecture, setup, and deployment docs
 
 ### Changed
+- Map tiles now come from Esri ArcGIS Online (streets and satellite) instead of OpenStreetMap, MapTiler and Google; `PUBLIC_MAPTILER_API_KEY` is no longer used
 - Migrated container registry from Docker Hub (personal) to GitHub Container Registry (org-owned)
 - Excluded unfinished mobile app from npm workspaces to fix dependency hoisting conflicts
 - Fixed map attribution to show correct provider (Google vs MapTiler) based on key availability
